@@ -193,13 +193,13 @@
             </div>
             <div style="display: flex">
               <v-btn
-                :loading="loading4"
-                :disabled="loading4"
+                :loading="loadingHomes"
+                :disabled="loadingHomes"
                 rounded
                 small
                 dense
                 color="info"
-                @click="loader = 'loading4'"
+                @click="(loader = 'lodingHomes'), requestHomes()"
               >
                 Rechercher
                 <template v-slot:loader>
@@ -231,6 +231,29 @@ export default {
       const index = this.selectedLocation.indexOf(item);
       if (index >= 0) this.selectedLocation.splice(index, 1);
     },
+    requestHomes() {
+      alert("Lance la Recherche");
+      let HomesFilter = {
+        selectedLocation: this.selectedLocation,
+        selectedTypeOfHouses: this.selectedTypeOfHouses.length
+          ? this.selectedTypeOfHouses
+          : undefined,
+        valueSurface: this.valueSurface,
+        valuePrice: this.valuePrice,
+        from: this.from,
+        to: this.to,
+      };
+
+      axios
+        .post("http://localhost:3000/requestHomes", HomesFilter)
+        .then((response) => {
+          console.log("Response", response);
+          this.loadingHomes = false;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
   },
   data: () => ({
     from: new Date().toISOString().substr(0, 10),
@@ -238,6 +261,8 @@ export default {
     menu: false,
     menu2: false,
     minPrice: 0,
+    Homes: [],
+    loadingHomes: false,
     maxPrice: 10000000,
     minSurface: 9,
     maxSurface: 10000,
@@ -268,7 +293,7 @@ export default {
         this.searchedResultLocation.length = 0;
         this.selectedLocation.length = 0;
         axios
-          .get("http://192.168.1.59:3000/adressHelper?adress=" + val)
+          .get("http://localhost:3000/adressHelper?adress=" + val)
           .then((response) => {
             console.log("Response", response);
             for (const city of response.data) {
